@@ -13,6 +13,8 @@
 <table class="table">
     <thead>
         <tr>
+            <th>Book Title</th>
+            <th>Reader Name</th>
             <th>Borrow Date</th>
             <th>Return Date</th>
             <th></th>
@@ -22,6 +24,8 @@
         @foreach (var item in Model)
         {
             <tr>
+                <td>@Html.DisplayFor(modelItem => item.BookTitle)</td>
+                <td>@Html.DisplayFor(modelItem => item.ReaderName)</td>
                 <td>@Html.DisplayFor(modelItem => item.BorrowDate)</td>
                 <td>@Html.DisplayFor(modelItem => item.ReturnDate)</td>
                 <td>
