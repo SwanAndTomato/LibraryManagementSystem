@@ -1,93 +1,147 @@
-﻿using LibraryManagementSystem.Models;
-using LibraryManagementSystem.Repositories;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using System.Reflection.PortableExecutable;
+using System.Threading.Tasks;
+using LibraryManagementSystem.Data;
+using LibraryManagementSystem.Models;
 
-public class ReadersController : Controller
+namespace LibraryManagementSystem.Controllers
 {
-    private readonly ReaderRepository _readerRepository;
-
-    public ReadersController(ReaderRepository readerRepository)
+    public class ReadersController : Controller
     {
-        _readerRepository = readerRepository;
-    }
+        private readonly ApplicationDbContext _context;
 
-    public IActionResult Index()
-    {
-        var readers = _readerRepository.GetAllReaders();
-        return View(readers);
-    }
-
-    public IActionResult Details(int id)
-    {
-        var reader = _readerRepository.GetReaderById(id);
-        if (reader == null)
+        public ReadersController(ApplicationDbContext context)
         {
-            return NotFound();
+            _context = context;
         }
-        return View(reader);
-    }
 
-    public IActionResult Create()
-    {
-        return View();
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public IActionResult Create(ReaderModel reader)
-    {
-        if (ModelState.IsValid)
+        // GET: Readers
+        public async Task<IActionResult> Index()
         {
-            _readerRepository.AddReader(reader);
+            return View(await _context.Readers.ToListAsync());
+        }
+
+        // GET: Readers/Details/5
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var reader = await _context.Readers
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (reader == null)
+            {
+                return NotFound();
+            }
+
+            return View(reader);
+        }
+
+        // GET: Readers/Create
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        // POST: Readers/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create([Bind("Id,Name,Address,BirthDate,Email")] ReaderModel reader)
+        {
+            if (ModelState.IsValid)
+            {
+                _context.Add(reader);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            return View(reader);
+        }
+
+        // GET: Readers/Edit/5
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var reader = await _context.Readers.FindAsync(id);
+            if (reader == null)
+            {
+                return NotFound();
+            }
+            return View(reader);
+        }
+
+        // POST: Readers/Edit/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Address,BirthDate,Email")] ReaderModel reader)
+        {
+            if (id != reader.Id)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    _context.Update(reader);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!ReaderExists(reader.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return RedirectToAction(nameof(Index));
+            }
+            return View(reader);
+        }
+
+        // GET: Readers/Delete/5
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var reader = await _context.Readers
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (reader == null)
+            {
+                return NotFound();
+            }
+
+            return View(reader);
+        }
+
+        // POST: Readers/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var reader = await _context.Readers.FindAsync(id);
+            _context.Readers.Remove(reader);
+            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
-        return View(reader);
-    }
 
-    public IActionResult Edit(int id)
-    {
-        var reader = _readerRepository.GetReaderById(id);
-        if (reader == null)
+        private bool ReaderExists(int id)
         {
-            return NotFound();
+            return _context.Readers.Any(e => e.Id == id);
         }
-        return View(reader);
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public IActionResult Edit(int id, ReaderModel reader)
-    {
-        if (id != reader.Id)
-        {
-            return NotFound();
-        }
-
-        if (ModelState.IsValid)
-        {
-            _readerRepository.UpdateReader(reader);
-            return RedirectToAction(nameof(Index));
-        }
-        return View(reader);
-    }
-
-    public IActionResult Delete(int id)
-    {
-        var reader = _readerRepository.GetReaderById(id);
-        if (reader == null)
-        {
-            return NotFound();
-        }
-
-        return View(reader);
-    }
-
-    [HttpPost, ActionName("Delete")]
-    [ValidateAntiForgeryToken]
-    public IActionResult DeleteConfirmed(int id)
-    {
-        _readerRepository.DeleteReader(id);
-        return RedirectToAction(nameof(Index));
     }
 }

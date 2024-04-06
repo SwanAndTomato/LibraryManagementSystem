@@ -1,10 +1,10 @@
-﻿using LibraryManagementSystem.Repositories;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using LibraryManagementSystem.Data;
 
 namespace LibraryManagementSystem
 {
@@ -19,19 +19,13 @@ namespace LibraryManagementSystem
 
         public void ConfigureServices(IServiceCollection services)
         {
-            // Add MVC services
+            // Configure Entity Framework Core to use MySQL
+            services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseMySql(Configuration.GetConnectionString("DefaultConnection"), new MySqlServerVersion(new Version(8,3, 0))));
+
+            // Add other services as needed
+
             services.AddControllersWithViews();
-
-            // Add repositories
-            services.AddScoped<BookRepository>();
-            services.AddScoped<ReaderRepository>();
-            services.AddScoped<BorrowingRepository>();
-
-            // Configure Identity if needed
-            // services.AddIdentity<ApplicationUser, IdentityRole>()
-            //     .AddEntityFrameworkStores<ApplicationDbContext>()
-            //     .AddDefaultUI()
-            //     .AddDefaultTokenProviders();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -39,7 +33,7 @@ namespace LibraryManagementSystem
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseMigrationsEndPoint();
+                app.UseDatabaseErrorPage();
             }
             else
             {
@@ -52,8 +46,7 @@ namespace LibraryManagementSystem
 
             app.UseRouting();
 
-            // app.UseAuthentication(); // Uncomment if using Identity
-            // app.UseAuthorization();
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {

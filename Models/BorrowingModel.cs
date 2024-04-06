@@ -1,27 +1,36 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-public class BorrowingModel
+namespace LibraryManagementSystem.Models
 {
-    public int Id { get; set; }
+    public class BorrowingModel
+    {
+        public int Id { get; set; }
+        public int BookId { get; set; }
+        public int ReaderId { get; set; }
 
-    [Display(Name = "Book")]
-    public int BookId { get; set; }
+        [Required(ErrorMessage = "Please select a book.")]
+        [Display(Name = "Book")]
+        public string BookTitle { get; set; }
 
-    [Display(Name = "Book Title")]
-    public string BookTitle { get; set; }
+        [Required(ErrorMessage = "Please select a reader.")]
+        [Display(Name = "Reader")]
+        public string ReaderName { get; set; }
 
-    [Display(Name = "Reader")]
-    public int ReaderId { get; set; }
+        [Required(ErrorMessage = "Please enter the borrow date.")]
+        [Display(Name = "Borrow Date")]
+        public DateOnly BorrowDate { get; set; }
 
-    [Display(Name = "Reader Name")]
-    public string ReaderName { get; set; }
+        [Display(Name = "Return Date")]
+        public DateOnly ReturnDate { get; set; }
 
-    [Display(Name = "Borrow Date")]
-    [DataType(DataType.Date)]
-    public DateTime BorrowDate { get; set; }
+        // Navigation properties
+        public BookModel Book { get; set; }
+        public ReaderModel Reader { get; set; }
 
-    [Display(Name = "Return Date")]
-    [DataType(DataType.Date)]
-    public DateTime? ReturnDate { get; set; }
+        // Additional properties for dropdown lists
+        public IEnumerable<BookModel> Books { get; set; }
+        public IEnumerable<ReaderModel> Readers { get; set; }
+    }
 }
